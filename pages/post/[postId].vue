@@ -9,8 +9,6 @@
 		}
 	);
 
-	console.log(post);
-
 	const isInfoShown: Ref = ref(false);
 	const isZoomIn: Ref = ref(false);
 </script>
@@ -216,13 +214,14 @@
 	}
 
 	.preview {
-		margin-inline: auto;
-		overflow: auto;
+		flex-grow: 1;
 		cursor: zoom-in;
 	}
 
 	.preview > img {
 		height: 100%;
+		width: 100%;
+		object-fit: contain;
 	}
 
 	.preview.zoom {
