@@ -4,17 +4,21 @@
 	});
 
 	const SUBREDDIT: String = "unixporn";
-	const LIMIT: number = 100;
+	const LIMIT: number = 200;
 
 	const { data: listings } = useFetch(
 		`https://www.reddit.com/r/${SUBREDDIT}/hot.json?limit=${LIMIT}`,
 		{
+			headers: { "User-Agent": "My Reddit API Client" },
 			transform: (listings: any) => {
 				let posts: any = listings.data.children;
-				posts = posts.filter((post: any) =>
-					Object.values(post.data.link_flair_richtext[0]).includes("Screenshot")
-				);
-				posts.length = 30;
+				posts = posts.filter((post: any) => {
+					return (
+						Object.values(post.data.link_flair_richtext[0]).includes(
+							"Screenshot"
+						) && post.data.preview.enabled
+					);
+				});
 				return posts;
 			},
 		}
@@ -39,11 +43,12 @@
 			<img
 				v-if="post.data.url_overridden_by_dest"
 				:src="parseImgUrl(post.data.url_overridden_by_dest)"
+				loading="lazy"
 			/>
 			<div class="post-heading">
 				<div>
-					<p>{{ post.data.title }}</p>
-					<p class="post-score">󰯎{{ post.data.score }}</p>
+					<span class="post-title">{{ post.data.title }}</span>
+					<span class="post-score">󰯎{{ post.data.score }}</span>
 				</div>
 			</div>
 		</NuxtLink>
@@ -52,29 +57,23 @@
 
 <style scoped>
 	main {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
 		font-family: "SauceCodePro Nerd Font", monospace;
-		color: white;
 		background-color: black;
 
-		overflow: auto;
-		scroll-snap-type: y proximity;
+		padding: 1.25rem;
+		column-count: 4;
+		column-gap: 1.25rem;
 	}
 
 	.post {
-		width: 50%;
-		height: 50vh;
-
 		display: grid;
-		place-content: stretch;
-		isolation: isolate;
-		overflow: hidden;
+		margin-bottom: 1.25rem;
 		color: white;
 		text-decoration: none;
+	}
 
-		scroll-snap-align: start;
+	.post > img {
+		border-radius: 0.75rem;
 	}
 
 	.post > img,
@@ -84,11 +83,8 @@
 	}
 
 	.post > img {
-		object-fit: cover;
-		object-position: center;
+		object-fit: contain;
 		width: 100%;
-		height: 100%;
-		overflow: hidden;
 	}
 
 	.post-heading {
@@ -119,6 +115,9 @@
 		align-items: flex-start;
 	}
 
+	.post-title {
+		word-break: break-word;
+	}
 	.post-score {
 		display: flex;
 		flex-direction: row;

@@ -10,20 +10,31 @@
 	);
 
 	const isInfoShown: Ref = ref(false);
-	const isZoomIn: Ref = ref(false);
+	const zoomValue: Ref = ref(100);
+
+	const zoomInOut = (newVal: number) => {
+		if (newVal == 20 && zoomValue.value < 200) {
+			zoomValue.value += newVal;
+		}
+		if (newVal == -20 && zoomValue.value > 100) {
+			zoomValue.value += newVal;
+		}
+	};
 </script>
 
 <template>
 	<main>
 		<header class="header">
+			<a href="#" class="go-back" @click="$router.back()"></a>
 			<span class="score">󰯎 {{ post.data.score }}</span>
 			<h1 class="title">{{ post.data.title }}</h1>
 			<a
 				class="permalink"
 				:href="`https://reddit.com${post.data.permalink}/`"
 				target="_blank"
-				></a
 			>
+				
+			</a>
 
 			<button
 				class="btn-show-info"
@@ -35,7 +46,7 @@
 		</header>
 
 		<div class="content">
-			<div class="info" :class="{ show: isInfoShown }">
+			<div class="info">
 				<div>
 					<span>
 						<a
@@ -63,12 +74,18 @@
 				</div>
 			</div>
 
-			<div
-				class="preview"
-				@click="isZoomIn = !isZoomIn"
-				:class="{ zoom: isZoomIn }"
-			>
-				<img :src="post.data.url_overridden_by_dest" />
+			<div class="preview">
+				<img
+					:src="post.data.url_overridden_by_dest"
+					:class="`zoom-in-${zoomValue}`"
+					loading="lazy"
+				/>
+
+				<div class="zoom-controls">
+					<button @click="zoomInOut(20)"></button>
+					<span>{{ zoomValue }}%</span>
+					<button @click="zoomInOut(-20)"></button>
+				</div>
 			</div>
 		</div>
 	</main>
@@ -104,11 +121,13 @@
 		white-space: nowrap;
 	}
 
+	.go-back,
 	.permalink {
 		color: white;
 		text-decoration: none;
 	}
 
+	.go-back:hover,
 	.permalink:hover {
 		text-decoration: underline;
 	}
@@ -215,21 +234,75 @@
 
 	.preview {
 		flex-grow: 1;
-		cursor: zoom-in;
+		cursor: grab;
+		overflow: auto;
+	}
+
+	.preview::after,
+	.preview::before {
+		content: "";
+		width: 0;
+		height: 0;
+		display: none;
+		clear: none;
 	}
 
 	.preview > img {
+		display: block;
 		height: 100%;
 		width: 100%;
 		object-fit: contain;
 	}
 
-	.preview.zoom {
-		overflow: auto;
-		cursor: zoom-out;
+	.preview > img.zoom-in-120 {
+		height: 120%;
+		width: 120%;
 	}
 
-	.preview.zoom > img {
-		height: unset;
+	.preview > img.zoom-in-140 {
+		height: 140%;
+		width: 140%;
+	}
+
+	.preview > img.zoom-in-160 {
+		height: 160%;
+		width: 160%;
+	}
+
+	.preview > img.zoom-in-180 {
+		height: 180%;
+		width: 180%;
+	}
+
+	.preview > img.zoom-in-200 {
+		height: 200%;
+		width: 200%;
+	}
+
+	.zoom-controls {
+		position: fixed;
+		bottom: 1.75rem;
+		left: 1.75rem;
+
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.zoom-controls > button {
+		color: white;
+		font-family: "SauceCodePro Nerd Font";
+		font-size: 1.5rem;
+		background-color: transparent;
+		border: none;
+		padding: 0.25rem 0.5rem;
+	}
+
+	.zoom-controls > button:hover {
+		text-shadow: 0px 0px 8px white;
+	}
+
+	.zoom-controls > button:active {
+		filter: brightness(80%);
 	}
 </style>
